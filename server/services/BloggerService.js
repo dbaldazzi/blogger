@@ -8,7 +8,7 @@ const _model = new Schema({
     authorId: { type: ObjectId, ref: 'User', required: true }
 }, { timestamps: true })
 
-export default class ValueService {
+export default class BloggerService {
     get repository() {
         return mongoose.model('value', _model)
     }
