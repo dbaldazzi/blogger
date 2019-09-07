@@ -10,6 +10,6 @@ const _model = new Schema({
 
 export default class BloggerService {
     get repository() {
-        return mongoose.model('value', _model)
+        return mongoose.model('blogs', _model)
     }
 }

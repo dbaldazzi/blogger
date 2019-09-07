@@ -1,17 +1,19 @@
 import express from 'express'
 import BloggerService from '../services/BloggerService';
 import { Authorize } from '../middleware/authorize.js'
+import CommentsService from '../services/CommentsService';
 
 let _bloggerService = new BloggerService().repository
+let _commentsService = new CommentsService().repository
 
 export default class BloggerController {
     constructor() {
         this.router = express.Router()
             //NOTE all routes after the authenticate method will require the user to be logged in to access
-
+            .use(Authorize.authenticated)
             .get('', this.getAll)
             .get('/:id', this.getById)
-            .use(Authorize.authenticated)
+            .get('/:id/comments', this.getComments)
             .post('', this.create)
             .put('/:id', this.edit)
             .delete('/:id', this.delete)
@@ -19,7 +21,7 @@ export default class BloggerController {
 
     async getAll(req, res, next) {
         try {
-            let data = await _bloggerService.find({})
+            let data = await _bloggerService.find({}).populate("bloggerId", "name")
             return res.send(data)
         } catch (error) { next(error) }
 
@@ -27,11 +29,18 @@ export default class BloggerController {
 
     async getById(req, res, next) {
         try {
-            let data = await _bloggerService.findById(req.params.id)
+            let data = await _bloggerService.findById(req.params.id).populate("bloggerId", "name")
             if (!data) {
                 throw new Error("Invalid Id")
             }
             res.send(data)
+        } catch (error) { next(error) }
+    }
+
+    async getComments(req, res, next) {
+        try {
+            let data = await _commentsService.find({ bloggerId: req.params.id }).populate("bloggerId", "name")
+            return res.send(data)
         } catch (error) { next(error) }
     }
 

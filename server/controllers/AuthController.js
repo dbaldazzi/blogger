@@ -8,6 +8,7 @@ const _repo = _userService.repository
 export default class AuthController {
     constructor() {
         this.router = express.Router()
+
             .post('/register', this.register)
             .post('/login', this.login)
             .use(Authorize.authenticated)
