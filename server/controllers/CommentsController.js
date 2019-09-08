@@ -16,6 +16,7 @@ export default class CommentsController {
       .post('', this.create)
       .put('/:id', this.edit)
       .delete('/:id', this.delete)
+
   }
 
   async getAll(req, res, next) {

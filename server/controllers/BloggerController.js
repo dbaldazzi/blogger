@@ -10,18 +10,20 @@ export default class BloggerController {
     constructor() {
         this.router = express.Router()
             //NOTE all routes after the authenticate method will require the user to be logged in to access
-            .use(Authorize.authenticated)
+
             .get('', this.getAll)
             .get('/:id', this.getById)
             .get('/:id/comments', this.getComments)
+            .use(Authorize.authenticated)
             .post('', this.create)
             .put('/:id', this.edit)
             .delete('/:id', this.delete)
+
     }
 
     async getAll(req, res, next) {
         try {
-            let data = await _bloggerService.find({}).populate("bloggerId", "name")
+            let data = await _bloggerService.find({}).populate("author", 'name')
             return res.send(data)
         } catch (error) { next(error) }
 
@@ -29,7 +31,7 @@ export default class BloggerController {
 
     async getById(req, res, next) {
         try {
-            let data = await _bloggerService.findById(req.params.id).populate("bloggerId", "name")
+            let data = await _bloggerService.findById(req.params.id).populate("author", 'name')
             if (!data) {
                 throw new Error("Invalid Id")
             }
@@ -39,7 +41,7 @@ export default class BloggerController {
 
     async getComments(req, res, next) {
         try {
-            let data = await _commentsService.find({ bloggerId: req.params.id }).populate("bloggerId", "name")
+            let data = await _commentsService.find({ bloggerId: req.params.id }).populate("author", 'name')
             return res.send(data)
         } catch (error) { next(error) }
     }
@@ -48,6 +50,7 @@ export default class BloggerController {
         try {
             //NOTE the user id is accessable through req.body.uid, never trust the client to provide you this information
             req.body.authorId = req.session.uid
+            req.body.author = req.session.uid
             let data = await _bloggerService.create(req.body)
             res.send(data)
         } catch (error) { next(error) }
