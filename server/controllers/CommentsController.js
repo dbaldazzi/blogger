@@ -10,11 +10,11 @@ export default class CommentsController {
   constructor() {
     this.router = express.Router()
       //NOTE all routes after the authenticate method will require the user to be logged in to access
-      .use(Authorize.authenticated)
+
       .get('', this.getAll)
       .get('/:id', this.getById)
       //.get('/blogs/:id/comments', this.getById)
-
+      .use(Authorize.authenticated)
       .post('', this.create)
       .put('/:id', this.edit)
       .delete('/:id', this.delete)
@@ -51,7 +51,7 @@ export default class CommentsController {
 
   async edit(req, res, next) {
     try {
-      req.body.authorId = req.session.uid
+      //req.body.authorId = req.session.uid
       let data = await _commentsService.findOneAndUpdate({ _id: req.params.id, authorId: req.session.uid }, req.body, { new: true })
       if (data) {
         return res.send(data)
@@ -64,7 +64,7 @@ export default class CommentsController {
 
   async delete(req, res, next) {
     try {
-      await _commentsService.findOneAndRemove({ _id: req.params.id })
+      await _commentsService.findOneAndRemove({ _id: req.params.id, authorId: req.session.uid })
       res.send("deleted value")
     } catch (error) { next(error) }
 
