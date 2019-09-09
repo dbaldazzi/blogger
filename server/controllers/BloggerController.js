@@ -10,11 +10,11 @@ export default class BloggerController {
     constructor() {
         this.router = express.Router()
             //NOTE all routes after the authenticate method will require the user to be logged in to access
-
+            .use(Authorize.authenticated)
             .get('', this.getAll)
             .get('/:id', this.getById)
-            .get('/:id/comments', this.getComments)
-            .use(Authorize.authenticated)
+            .get('blogs/:id/comments', this.getComments)
+
             .post('', this.create)
             .put('/:id', this.edit)
             .delete('/:id', this.delete)
@@ -58,7 +58,9 @@ export default class BloggerController {
 
     async edit(req, res, next) {
         try {
-            let data = await _bloggerService.findOneAndUpdate({ _id: req.params.id, }, req.body, { new: true })
+            //req.body.author = req.seesion.uid
+            req.body.authorId = req.session.uid
+            let data = await _bloggerService.findOneAndUpdate({ _id: req.params.id, authorId: req.session.uid }, req.body, { new: true })
             if (data) {
                 return res.send(data)
             }

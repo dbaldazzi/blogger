@@ -13,6 +13,8 @@ export default class CommentsController {
       .use(Authorize.authenticated)
       .get('', this.getAll)
       .get('/:id', this.getById)
+      //.get('/blogs/:id/comments', this.getById)
+
       .post('', this.create)
       .put('/:id', this.edit)
       .delete('/:id', this.delete)
@@ -21,7 +23,7 @@ export default class CommentsController {
 
   async getAll(req, res, next) {
     try {
-      let data = await _commentsService.find({}).populate("bloggerId", "name")
+      let data = await _commentsService.find({}).populate("author", "name")
       return res.send(data)
     } catch (error) { next(error) }
 
@@ -29,7 +31,7 @@ export default class CommentsController {
 
   async getById(req, res, next) {
     try {
-      let data = await _commentsService.findById(req.params.id).populate("bloggerId", "name")
+      let data = await _commentsService.findById(req.params.id).populate("author", "name")
       if (!data) {
         throw new Error("Invalid Id")
       }
@@ -41,6 +43,7 @@ export default class CommentsController {
     try {
       //NOTE the user id is accessable through req.body.uid, never trust the client to provide you this information
       req.body.authorId = req.session.uid
+      req.body.blogs
       let data = await _commentsService.create(req.body)
       res.send(data)
     } catch (error) { next(error) }
@@ -48,7 +51,8 @@ export default class CommentsController {
 
   async edit(req, res, next) {
     try {
-      let data = await _commentsService.findOneAndUpdate({ _id: req.params.id, }, req.body, { new: true })
+      req.body.authorId = req.session.uid
+      let data = await _commentsService.findOneAndUpdate({ _id: req.params.id, authorId: req.session.uid }, req.body, { new: true })
       if (data) {
         return res.send(data)
       }

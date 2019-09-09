@@ -6,7 +6,7 @@ const _model = new Schema({
     title: { type: String, required: true },
     description: { type: String, required: false },
     authorId: { type: ObjectId, ref: 'User', required: true },
-    //author: { type: ObjectId, ref: 'User', String, required: true },
+    author: { type: ObjectId, ref: 'User', required: true },
 }, { timestamps: true })
 
 
